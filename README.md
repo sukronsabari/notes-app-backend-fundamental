@@ -1,2 +1,2 @@
-# Web Server dengan NodeJS (Hapi Framework)
-Web Server dengan NodeJs (Hapi) - Project Belajar Pada Kelas Belajar Backend Untuk Pemula Dicoding Academy
+# Web Server dengan NodeJS (Hapi Framework) - With Plugin and Data Validation using Joi
+Web Server dengan NodeJs (Hapi) - Project Belajar Pada Kelas Belajar Fundamental Backend
