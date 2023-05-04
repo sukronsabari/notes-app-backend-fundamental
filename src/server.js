@@ -53,7 +53,8 @@ const init = async () => {
       sub: false,
       maxAgeSec: process.env.ACCESS_TOKEN_AGE,
     },
-    // fungsi yang membawa artifacts token, dan dapat menyimpan payload(kredensial) pada request.auth
+
+    // fungsi yang mengambil artifacts token dari JWT dan mengembalikan property yang dapat digunakan pada parameter handler yakni request.auth
     validate: (artifacts) => ({
       isValid: true,
       credentials: {
