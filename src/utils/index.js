@@ -1,4 +1,12 @@
-function mapDBToModel({ id, title, body, tags, created_at, updated_at }) {
+function mapDBToModel({
+  id,
+  title,
+  body,
+  tags,
+  created_at,
+  updated_at,
+  username,
+}) {
   return {
     id,
     title,
@@ -6,6 +14,7 @@ function mapDBToModel({ id, title, body, tags, created_at, updated_at }) {
     tags,
     createdAt: created_at,
     updatedAt: updated_at,
+    username,
   };
 }
 
