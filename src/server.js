@@ -1,8 +1,10 @@
 // mengimpor dotenv dan menjalankan konfigurasinya, agar .env dibaca u/ config node-postgres saat membuat koneksi dengan client atau pool
 require("dotenv").config();
 
+const path = require("node:path");
 const Hapi = require("@hapi/hapi");
 const Jwt = require("@hapi/jwt");
+const Inert = require("@hapi/inert");
 
 // notes
 const notes = require("./api/notes");
@@ -30,11 +32,19 @@ const _exports = require("./api/exports");
 const ProducerService = require("./services/rabbitmq/ProducerService");
 const ExportsValidator = require("./validator/exports");
 
+// upload
+const upload = require("./api/upload");
+const StorageService = require("./services/storage/StorageService");
+const UploadValidator = require("./validator/upload");
+
 const init = async () => {
   const collaborationsService = new CollaborationsService();
   const notesService = new NotesService(collaborationsService);
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
+  const storageService = new StorageService(
+    path.resolve(__dirname, "api/upload/file/images")
+  );
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -51,6 +61,9 @@ const init = async () => {
     {
       // registrasi schema 'jwt' dengan external plugin
       plugin: Jwt,
+    },
+    {
+      plugin: Inert,
     },
   ]);
 
@@ -111,6 +124,13 @@ const init = async () => {
       options: {
         service: ProducerService,
         validator: ExportsValidator,
+      },
+    },
+    {
+      plugin: upload,
+      options: {
+        service: storageService,
+        validator: UploadValidator,
       },
     },
   ]);
