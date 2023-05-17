@@ -1,28 +1,48 @@
-const AWS = require("aws-sdk");
+const {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const InvariantError = require("../../exceptions/InvariantError");
 
 class StorageService {
   constructor() {
-    this._S3 = new AWS.S3();
+    this._S3Client = new S3Client({ region: "ap-southeast-1" });
   }
 
-  writeFile(file, meta) {
-    const parameter = {
+  async writeFile(file, meta) {
+    const key = +new Date() + meta.filename;
+
+    const params = {
       Bucket: process.env.AWS_BUCKET_NAME, // Nama S3 Bucket yang digunakan
-      Key: +new Date() + meta.filename, // Nama berkas yang akan disimpan
+      Key: key, // Nama berkas yang akan disimpan
       Body: file._data, // Berkas (dalam bentuk Buffer) yang akan disimpan
       ContentType: meta.headers["content-type"], // MIME Type berkas yang akan disimpan
     };
 
-    return new Promise((resolve, reject) => {
-      this._S3.upload(parameter, (error, data) => {
-        if (error) {
-          return reject(error);
-        }
+    const uploadCommand = new PutObjectCommand(params);
 
-        // membawa url berkas yang terupload
-        return resolve(data.Location);
+    try {
+      await this._S3Client.send(uploadCommand);
+
+      const getObjectCommand = new GetObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: key,
       });
-    });
+
+      // Mendapatkan URL akses publik dari respons
+      const publicUrl = await getSignedUrl(this._S3Client, getObjectCommand);
+
+      const { origin, pathname } = new URL(publicUrl);
+      const fileName = pathname.split("/").pop();
+
+      const shortedPublicUrl = `${origin}/${fileName}`;
+
+      return shortedPublicUrl;
+    } catch (error) {
+      throw new InvariantError(error.message);
+    }
   }
 }
 
