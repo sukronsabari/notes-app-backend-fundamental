@@ -38,6 +38,7 @@ class NotesService {
     try {
       // mendapatkan notes dari cache
       const result = await this._cacheService.get(`notes:${owner}`);
+      console.log(`Get notes from cache: notes:${owner}`);
       return JSON.parse(result);
     } catch (error) {
       // bila gagal, diteruskan dengan mendapatkan notes dari database
